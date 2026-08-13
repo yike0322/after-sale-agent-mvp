@@ -1,1 +1,7 @@
 .worktrees/
+target/
+.idea/
+.vscode/
+.env
+*.log
+*.iml
