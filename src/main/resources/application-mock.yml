@@ -3,6 +3,9 @@ aftersale:
     provider: mock
 
 spring:
+  config:
+    activate:
+      on-profile: "mock & !dashscope"
   ai:
     dashscope:
       enabled: false

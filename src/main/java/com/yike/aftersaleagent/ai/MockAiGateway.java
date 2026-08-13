@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 
 @Component
-@Profile({"default", "mock", "test"})
+@Profile("!dashscope & (default | mock | test)")
 public class MockAiGateway implements AiGateway {
     private static final List<String> COUPON_KEYWORDS = List.of("优惠券", "满减", "C1001");
     private static final List<String> FAQ_KEYWORDS = List.of("规则", "七天", "售后");

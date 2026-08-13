@@ -201,3 +201,71 @@ as the process environment variable, start with the explicit `dashscope`
 profile, and exercise a bounded classification plus explanation while checking
 that only `DashScopeAiGateway` is selected. Do not commit the key or command
 history containing its value.
+
+## Fix round 1
+
+### Finding and root cause
+
+Review found that profile exclusivity was not enforced for combined profiles.
+The original `@Profile({"default", "mock", "test"})` uses OR semantics, so
+`dashscope,mock` and `dashscope,test` still created `MockAiGateway` alongside
+`DashScopeAiGateway`. Also, `application-mock.yml` loaded whenever `mock` was
+active and set `spring.ai.dashscope.enabled=false`, so the mock configuration
+could suppress DashScope auto-configuration even when `dashscope` was explicit.
+
+### Focused RED
+
+Command, with the same process-local Java 21 and Maven setup documented above:
+
+```powershell
+.\mvnw.cmd test '-Dtest=AiProfileSelectionTest'
+```
+
+Result: expected `BUILD FAILURE`, 8 tests run, 4 failures, 0 errors. Both
+combined-profile component cases found one unexpected `MockAiGateway`, and
+both combined-profile config-data cases resolved
+`spring.ai.dashscope.enabled=false` instead of allowing DashScope enablement.
+
+The test uses real Spring profile conditions and Boot config-data loading. A
+test-only `ChatClient.Builder` double allows component selection to be checked
+without constructing a real model client, reading an API key, or making a
+network call. Real DashScope execution remains intentionally unverified because
+`DASHSCOPE_API_KEY` is not present.
+
+### Fix
+
+- Changed the mock component condition to
+  `!dashscope & (default | mock | test)`, so explicit DashScope always excludes
+  `MockAiGateway`.
+- Added `spring.config.activate.on-profile: "mock & !dashscope"` to
+  `application-mock.yml`, so mock-only provider disabling cannot override an
+  explicit DashScope profile.
+- Added `AiProfileSelectionTest`, which proves exactly one selected gateway for
+  no explicit profile, `mock`, `test`, `dashscope`, `dashscope,mock`, and
+  `dashscope,test`. It also proves effective DashScope enablement wins for both
+  combined-profile configurations.
+
+### Verification
+
+Covering command:
+
+```powershell
+.\mvnw.cmd test '-Dtest=AiProfileSelectionTest,ChatControllerSseTest'
+```
+
+Result: `BUILD SUCCESS`, 12 tests run, 0 failures, 0 errors, 0 skipped.
+
+Full command:
+
+```powershell
+.\mvnw.cmd test
+```
+
+Result: `BUILD SUCCESS`, 23 tests run, 0 failures, 0 errors, 0 skipped.
+
+Files changed in this fix round:
+
+- `src/main/java/com/yike/aftersaleagent/ai/MockAiGateway.java`
+- `src/main/resources/application-mock.yml`
+- `src/test/java/com/yike/aftersaleagent/ai/AiProfileSelectionTest.java`
+- `.superpowers/sdd/2026-08-13-intelligent-customer-service-agent-mvp-implementation/task-4-report.md`
