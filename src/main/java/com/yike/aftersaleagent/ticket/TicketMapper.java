@@ -3,6 +3,8 @@ package com.yike.aftersaleagent.ticket;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
 
 @Mapper
 public interface TicketMapper {
@@ -21,8 +23,19 @@ public interface TicketMapper {
             WHERE id = #{ticketId} AND user_id = #{userId}
             """)
     int updateOwnedStatusAndSummary(
-            @org.apache.ibatis.annotations.Param("userId") long userId,
-            @org.apache.ibatis.annotations.Param("ticketId") long ticketId,
-            @org.apache.ibatis.annotations.Param("status") String status,
-            @org.apache.ibatis.annotations.Param("resultSummary") String resultSummary);
+            @Param("userId") long userId,
+            @Param("ticketId") long ticketId,
+            @Param("status") String status,
+            @Param("resultSummary") String resultSummary);
+
+    @Select("""
+            SELECT ct.id AS ticketId, ct.ticket_type AS ticketType, ct.status, ct.priority,
+                   tt.current_step AS currentStep, tt.total_steps AS totalSteps,
+                   ct.result_summary AS resultSummary
+            FROM customer_ticket ct
+            JOIN ticket_task tt ON tt.ticket_id = ct.id
+            WHERE ct.id = #{ticketId} AND ct.user_id = #{userId}
+            """)
+    @Options(timeout = 2)
+    TicketDetailRecord findOwnedDetail(@Param("userId") long userId, @Param("ticketId") long ticketId);
 }

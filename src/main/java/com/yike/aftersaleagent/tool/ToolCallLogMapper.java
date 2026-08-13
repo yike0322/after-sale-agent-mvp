@@ -1,9 +1,12 @@
 package com.yike.aftersaleagent.tool;
 
+import com.yike.aftersaleagent.ticket.ToolCallLogRecord;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.Select;
+import java.util.List;
 
 @Mapper
 public interface ToolCallLogMapper {
@@ -40,4 +43,16 @@ public interface ToolCallLogMapper {
             @Param("userId") long userId,
             @Param("ticketId") long ticketId,
             @Param("requestId") String requestId);
+
+    @Select("""
+            SELECT tcl.tool_name AS toolName, tcl.success, tcl.cost_time_ms AS costTimeMs,
+                   tcl.request_summary AS requestSummary, tcl.response_summary AS responseSummary,
+                   tcl.error_message AS errorCode
+            FROM tool_call_log tcl
+            JOIN customer_ticket ct ON ct.id = tcl.ticket_id
+            WHERE ct.id = #{ticketId} AND ct.user_id = #{userId}
+            ORDER BY tcl.created_at ASC, tcl.id ASC
+            """)
+    @org.apache.ibatis.annotations.Options(timeout = 2)
+    List<ToolCallLogRecord> findForOwnedTicket(@Param("userId") long userId, @Param("ticketId") long ticketId);
 }

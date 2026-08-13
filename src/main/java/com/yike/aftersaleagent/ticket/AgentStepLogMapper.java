@@ -4,6 +4,8 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
+import org.apache.ibatis.annotations.Select;
+import java.util.List;
 
 @Mapper
 public interface AgentStepLogMapper {
@@ -24,4 +26,16 @@ public interface AgentStepLogMapper {
             @Param("inputSummary") String inputSummary,
             @Param("outputSummary") String outputSummary,
             @Param("errorCode") String errorCode);
+
+    @Select("""
+            SELECT asl.step_no AS stepNo, asl.step_name AS stepName, asl.status,
+                   asl.input_summary AS inputSummary, asl.output_summary AS outputSummary,
+                   asl.error_message AS errorCode, asl.started_at AS startedAt, asl.ended_at AS endedAt
+            FROM agent_step_log asl
+            JOIN customer_ticket ct ON ct.id = asl.ticket_id
+            WHERE ct.id = #{ticketId} AND ct.user_id = #{userId}
+            ORDER BY asl.step_no ASC, asl.id ASC
+            """)
+    @Options(timeout = 2)
+    List<AgentStepLogRecord> findForOwnedTicket(@Param("userId") long userId, @Param("ticketId") long ticketId);
 }
