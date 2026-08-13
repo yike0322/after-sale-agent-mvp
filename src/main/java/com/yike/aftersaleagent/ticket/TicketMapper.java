@@ -14,4 +14,15 @@ public interface TicketMapper {
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(CustomerTicket ticket);
+
+    @org.apache.ibatis.annotations.Update("""
+            UPDATE customer_ticket
+            SET status = #{status}, result_summary = #{resultSummary}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = #{ticketId} AND user_id = #{userId}
+            """)
+    int updateOwnedStatusAndSummary(
+            @org.apache.ibatis.annotations.Param("userId") long userId,
+            @org.apache.ibatis.annotations.Param("ticketId") long ticketId,
+            @org.apache.ibatis.annotations.Param("status") String status,
+            @org.apache.ibatis.annotations.Param("resultSummary") String resultSummary);
 }

@@ -27,4 +27,16 @@ public interface TicketTaskMapper {
             """)
     @Options(useGeneratedKeys = true, keyProperty = "id")
     int insert(TicketTask task);
+
+    @org.apache.ibatis.annotations.Update("""
+            UPDATE ticket_task
+            SET status = #{targetStatus}, current_step = #{currentStep}, updated_at = CURRENT_TIMESTAMP
+            WHERE id = #{taskId} AND ticket_id = #{ticketId} AND status = #{expectedStatus}
+            """)
+    int transition(
+            @Param("taskId") long taskId,
+            @Param("ticketId") long ticketId,
+            @Param("expectedStatus") String expectedStatus,
+            @Param("targetStatus") String targetStatus,
+            @Param("currentStep") int currentStep);
 }
