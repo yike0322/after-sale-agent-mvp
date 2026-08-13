@@ -107,8 +107,8 @@ Audit & Trace Log
 | --- | --- | --- |
 | JDK | JDK 21 LTS | 满足 Spring AI Alibaba 的 JDK 17+ 要求，并保留长期支持能力 |
 | 构建 | Maven 3.9+ | Java 后端常用、依赖与测试命令清晰 |
-| Web | Spring Boot 3.4.5、Spring MVC | 稳定单体后端与 SSE 支持 |
-| AI | Spring AI Alibaba 1.0.0.2 | 与 Spring Boot 3.4.5 的官方兼容组合；模型供应商由配置抽象 |
+| Web | Spring Boot 3.5.8、Spring MVC | 稳定单体后端与 SSE 支持 |
+| AI | Spring AI 1.1.2、Spring AI Alibaba BOM 1.1.2.0、Extensions BOM 1.1.2.1 | 官方推荐的 Spring Boot 3.5.x 兼容线；模型供应商由配置抽象 |
 | 持久化 | MySQL 8、MyBatis-Plus | 保存会话、业务演示数据、工单和审计记录 |
 | 缓存 | Redis 7 | 仅用于会话短缓存、任务进度和幂等标记 |
 | 向量库 | Qdrant | 仅使用一种向量数据库，支持 Metadata 过滤 |
