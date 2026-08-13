@@ -2,7 +2,10 @@ package com.yike.aftersaleagent.chat;
 
 import com.yike.aftersaleagent.ai.AiGateway;
 import com.yike.aftersaleagent.ai.MockAiGateway;
+import com.yike.aftersaleagent.agent.Intent;
+import com.yike.aftersaleagent.chat.api.SourceCitation;
 import com.yike.aftersaleagent.identity.CurrentDemoUser;
+import com.yike.aftersaleagent.knowledge.KnowledgeRetriever;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -11,10 +14,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
@@ -35,6 +42,9 @@ class ChatControllerSseTest {
 
     @Autowired
     List<AiGateway> aiGateways;
+
+    @MockitoBean
+    KnowledgeRetriever knowledgeRetriever;
 
     @Test
     void streamsNamedStatusMessageAndTerminalDoneEventsForAnOwnedSession() throws Exception {
@@ -71,6 +81,11 @@ class ChatControllerSseTest {
     @Test
     void supportedIntentAlsoTerminatesNormallyWithTheSingleMockGateway() throws Exception {
         String sessionId = sessionService.createSession(USER);
+        given(knowledgeRetriever.retrieve(eq(Intent.FAQ_QUERY), eq("NORMAL"), any(), eq(3)))
+                .willReturn(List.of(new SourceCitation(
+                        "售后服务规则",
+                        "knowledge/after-sale-rule.md",
+                        "普通商品签收后 7 天内，未使用且无损坏时可申请退货。")));
 
         MvcResult started = mockMvc.perform(post("/api/chat/stream")
                         .header("X-Demo-User-Id", "10001")
@@ -88,8 +103,12 @@ class ChatControllerSseTest {
                 .getContentAsString(StandardCharsets.UTF_8);
 
         assertThat(stream)
-                .contains("event:status", "FAQ_QUERY", "event:done")
-                .containsSubsequence("event:status", "event:message", "event:done")
+                .contains(
+                        "event:status",
+                        "正在检索售后规则…",
+                        "knowledge/after-sale-rule.md",
+                        "event:done")
+                .containsSubsequence("正在识别您的问题…", "正在检索售后规则…", "event:message", "event:done")
                 .endsWith("event:done\ndata:[DONE]\n\n");
         assertThat(aiGateways).singleElement().isInstanceOf(MockAiGateway.class);
     }

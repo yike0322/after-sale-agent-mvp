@@ -1,0 +1,122 @@
+[
+  {
+    "question": "普通商品签收后多久可以申请退货？",
+    "scene": "AFTER_SALE",
+    "expectedSourcePath": "knowledge/after-sale-rule.md",
+    "expectedEvidencePhrase": "签收后 7 天内"
+  },
+  {
+    "question": "商品已经使用过，还能按演示规则退货吗？",
+    "scene": "AFTER_SALE",
+    "expectedSourcePath": "knowledge/after-sale-rule.md",
+    "expectedEvidencePhrase": "未使用"
+  },
+  {
+    "question": "退货时包装损坏会有什么影响？",
+    "scene": "AFTER_SALE",
+    "expectedSourcePath": "knowledge/after-sale-rule.md",
+    "expectedEvidencePhrase": "无损坏"
+  },
+  {
+    "question": "售后资格咨询需要提供哪些订单信息？",
+    "scene": "AFTER_SALE",
+    "expectedSourcePath": "knowledge/after-sale-rule.md",
+    "expectedEvidencePhrase": "订单号"
+  },
+  {
+    "question": "谁来最终确认退货是否受理？",
+    "scene": "AFTER_SALE",
+    "expectedSourcePath": "knowledge/after-sale-rule.md",
+    "expectedEvidencePhrase": "人工售后"
+  },
+  {
+    "question": "优惠券什么时候不能使用？",
+    "scene": "COUPON",
+    "expectedSourcePath": "knowledge/coupon-rule.md",
+    "expectedEvidencePhrase": "有效期内"
+  },
+  {
+    "question": "使用优惠券需要满足什么订单金额条件？",
+    "scene": "COUPON",
+    "expectedSourcePath": "knowledge/coupon-rule.md",
+    "expectedEvidencePhrase": "最低订单金额"
+  },
+  {
+    "question": "一笔订单可以使用几张同类优惠券？",
+    "scene": "COUPON",
+    "expectedSourcePath": "knowledge/coupon-rule.md",
+    "expectedEvidencePhrase": "一张同类优惠券"
+  },
+  {
+    "question": "已经退款的优惠券还能抵扣吗？",
+    "scene": "COUPON",
+    "expectedSourcePath": "knowledge/coupon-rule.md",
+    "expectedEvidencePhrase": "已退款"
+  },
+  {
+    "question": "核对优惠券问题时应准备什么？",
+    "scene": "COUPON",
+    "expectedSourcePath": "knowledge/coupon-rule.md",
+    "expectedEvidencePhrase": "优惠券编号"
+  },
+  {
+    "question": "演示中的普通商品不包括哪些类型？",
+    "scene": "PRODUCT",
+    "expectedSourcePath": "knowledge/product-rule.md",
+    "expectedEvidencePhrase": "虚拟商品"
+  },
+  {
+    "question": "普通商品咨询可以参考哪些商品信息？",
+    "scene": "PRODUCT",
+    "expectedSourcePath": "knowledge/product-rule.md",
+    "expectedEvidencePhrase": "商品名称"
+  },
+  {
+    "question": "特殊商品类别应该怎样处理？",
+    "scene": "PRODUCT",
+    "expectedSourcePath": "knowledge/product-rule.md",
+    "expectedEvidencePhrase": "人工确认"
+  },
+  {
+    "question": "商品说明会把演示分类当成真实属性吗？",
+    "scene": "PRODUCT",
+    "expectedSourcePath": "knowledge/product-rule.md",
+    "expectedEvidencePhrase": "真实商品属性"
+  },
+  {
+    "question": "这个智能客服演示覆盖哪些问题？",
+    "scene": "FAQ",
+    "expectedSourcePath": "knowledge/faq.md",
+    "expectedEvidencePhrase": "售后规则问答"
+  },
+  {
+    "question": "为了检索演示资料需要准备哪些信息？",
+    "scene": "FAQ",
+    "expectedSourcePath": "knowledge/faq.md",
+    "expectedEvidencePhrase": "订单号"
+  },
+  {
+    "question": "知识问答会直接完成真实退款吗？",
+    "scene": "FAQ",
+    "expectedSourcePath": "knowledge/faq.md",
+    "expectedEvidencePhrase": "不会"
+  },
+  {
+    "question": "退款资格结论是最终承诺吗？",
+    "scene": "REFUND",
+    "expectedSourcePath": "knowledge/refund-rule.md",
+    "expectedEvidencePhrase": "只是基于已检索规则的建议"
+  },
+  {
+    "question": "符合演示条件时系统会执行什么操作？",
+    "scene": "REFUND",
+    "expectedSourcePath": "knowledge/refund-rule.md",
+    "expectedEvidencePhrase": "WAIT_HUMAN"
+  },
+  {
+    "question": "这个系统会直接退款或修改账户资金吗？",
+    "scene": "REFUND",
+    "expectedSourcePath": "knowledge/refund-rule.md",
+    "expectedEvidencePhrase": "绝不会直接退款"
+  }
+]

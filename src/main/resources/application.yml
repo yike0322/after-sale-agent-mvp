@@ -5,6 +5,9 @@ spring:
     default: mock
     group:
       test: mock
+  ai:
+    vectorstore:
+      type: none
 
 management:
   endpoints:

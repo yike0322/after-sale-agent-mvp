@@ -8,6 +8,7 @@ import com.yike.aftersaleagent.common.api.ErrorCode;
 import com.yike.aftersaleagent.common.exception.BusinessException;
 import com.yike.aftersaleagent.common.trace.RequestIdFilter;
 import com.yike.aftersaleagent.identity.CurrentDemoUser;
+import com.yike.aftersaleagent.knowledge.KnowledgeAnswerService;
 import com.yike.aftersaleagent.tool.AgentExecutionContext;
 import java.util.List;
 import org.slf4j.MDC;
@@ -17,15 +18,21 @@ import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 @Service
 class DefaultChatOrchestrator implements ChatOrchestrator {
     private static final String RECOGNIZING_STATUS = "正在识别您的问题…";
+    private static final String RETRIEVING_STATUS = "正在检索售后规则…";
     private static final String UNSUPPORTED_REPLY =
             "当前演示仅支持售后规则、优惠券问题和退款资格判断。";
 
     private final SessionService sessionService;
     private final IntentRouter intentRouter;
+    private final KnowledgeAnswerService knowledgeAnswerService;
 
-    DefaultChatOrchestrator(SessionService sessionService, IntentRouter intentRouter) {
+    DefaultChatOrchestrator(
+            SessionService sessionService,
+            IntentRouter intentRouter,
+            KnowledgeAnswerService knowledgeAnswerService) {
         this.sessionService = sessionService;
         this.intentRouter = intentRouter;
+        this.knowledgeAnswerService = knowledgeAnswerService;
     }
 
     @Override
@@ -41,7 +48,12 @@ class DefaultChatOrchestrator implements ChatOrchestrator {
             sessionService.appendUserMessage(user, request.sessionId(), request.message());
             publisher.status(RECOGNIZING_STATUS);
             Intent intent = intentRouter.route(context);
-            publisher.message(outcome(intent));
+            if (intent == Intent.FAQ_QUERY) {
+                publisher.status(RETRIEVING_STATUS);
+                publisher.message(knowledgeAnswerService.answer(context));
+            } else {
+                publisher.message(outcome(intent));
+            }
             publisher.done();
         } catch (BusinessException exception) {
             ErrorCode errorCode = exception.getErrorCode();

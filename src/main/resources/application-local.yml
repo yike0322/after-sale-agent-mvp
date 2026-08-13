@@ -9,8 +9,13 @@ spring:
       port: ${REDIS_PORT}
   flyway:
     enabled: true
-
-app:
-  qdrant:
-    host: ${QDRANT_HOST}
-    grpc-port: ${QDRANT_GRPC_PORT}
+  ai:
+    vectorstore:
+      type: qdrant
+      qdrant:
+        host: ${QDRANT_HOST}
+        port: ${QDRANT_GRPC_PORT:6334}
+        collection-name: after_sale_knowledge
+        use-tls: false
+        # Spring AI 1.1.2 intentionally uses the built-in Qdrant doc_content field.
+        initialize-schema: true

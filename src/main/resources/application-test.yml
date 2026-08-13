@@ -6,6 +6,9 @@ spring:
     password:
   flyway:
     enabled: true
+  ai:
+    vectorstore:
+      type: none
 
 management:
   health:
