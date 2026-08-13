@@ -1,0 +1,9 @@
+spring:
+  application:
+    name: after-sale-agent
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health

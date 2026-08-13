@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    url: jdbc:mysql://${MYSQL_HOST}:${MYSQL_PORT}/${MYSQL_DATABASE}
+    username: ${MYSQL_USER}
+    password: ${MYSQL_PASSWORD}
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+  flyway:
+    enabled: true
+
+app:
+  qdrant:
+    host: ${QDRANT_HOST}
+    grpc-port: ${QDRANT_GRPC_PORT}
