@@ -7,6 +7,7 @@ import com.yike.aftersaleagent.chat.api.ChatRequest;
 import com.yike.aftersaleagent.common.api.ErrorCode;
 import com.yike.aftersaleagent.common.exception.BusinessException;
 import com.yike.aftersaleagent.common.trace.RequestIdFilter;
+import com.yike.aftersaleagent.coupon.CouponAnalysisWorkflow;
 import com.yike.aftersaleagent.identity.CurrentDemoUser;
 import com.yike.aftersaleagent.knowledge.KnowledgeAnswerService;
 import com.yike.aftersaleagent.tool.AgentExecutionContext;
@@ -25,14 +26,17 @@ class DefaultChatOrchestrator implements ChatOrchestrator {
     private final SessionService sessionService;
     private final IntentRouter intentRouter;
     private final KnowledgeAnswerService knowledgeAnswerService;
+    private final CouponAnalysisWorkflow couponAnalysisWorkflow;
 
     DefaultChatOrchestrator(
             SessionService sessionService,
             IntentRouter intentRouter,
-            KnowledgeAnswerService knowledgeAnswerService) {
+            KnowledgeAnswerService knowledgeAnswerService,
+            CouponAnalysisWorkflow couponAnalysisWorkflow) {
         this.sessionService = sessionService;
         this.intentRouter = intentRouter;
         this.knowledgeAnswerService = knowledgeAnswerService;
+        this.couponAnalysisWorkflow = couponAnalysisWorkflow;
     }
 
     @Override
@@ -51,6 +55,8 @@ class DefaultChatOrchestrator implements ChatOrchestrator {
             if (intent == Intent.FAQ_QUERY) {
                 publisher.status(RETRIEVING_STATUS);
                 publisher.message(knowledgeAnswerService.answer(context));
+            } else if (intent == Intent.COUPON_ANALYSIS) {
+                publisher.message(couponAnalysisWorkflow.execute(context, publisher::status));
             } else {
                 publisher.message(outcome(intent));
             }
