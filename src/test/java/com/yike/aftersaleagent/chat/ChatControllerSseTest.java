@@ -196,6 +196,42 @@ class ChatControllerSseTest {
     }
 
     @Test
+    void refundWorkflowEmitsTicketThenAsyncControlledProgressAndTerminalOutcome() throws Exception {
+        CurrentDemoUser refundUser = new CurrentDemoUser(10002L, "Demo User 10002");
+        String sessionId = sessionService.createSession(refundUser);
+
+        MvcResult started = mockMvc.perform(post("/api/chat/stream")
+                        .header("X-Demo-User-Id", "10002")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.TEXT_EVENT_STREAM)
+                        .content("{\"sessionId\":\"" + sessionId
+                                + "\",\"message\":\"我要退货，订单号 O2001\"}"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        String stream = mockMvc.perform(asyncDispatch(started))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString(StandardCharsets.UTF_8);
+
+        assertThat(stream)
+                .contains("event:ticket", "\"taskStatus\":\"PENDING\"", "\"taskStatus\":\"WAIT_HUMAN\"", "event:done")
+                .containsSubsequence(
+                        "正在识别您的问题…",
+                        "正在创建退款审核工单…",
+                        "event:ticket",
+                        "正在查询订单…",
+                        "正在检索售后规则…",
+                        "正在判定退款资格…",
+                        "正在更新人工审核工单…",
+                        "正在生成处理摘要…",
+                        "event:message",
+                        "event:done")
+                .endsWith("event:done\ndata:[DONE]\n\n");
+    }
+
+    @Test
     void foreignSessionEmitsProjectErrorCodeThenTerminates() throws Exception {
         String foreignSessionId = sessionService.createSession(
                 new CurrentDemoUser(10002L, "Demo User 10002"));

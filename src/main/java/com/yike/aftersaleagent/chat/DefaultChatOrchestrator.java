@@ -10,6 +10,8 @@ import com.yike.aftersaleagent.common.trace.RequestIdFilter;
 import com.yike.aftersaleagent.coupon.CouponAnalysisWorkflow;
 import com.yike.aftersaleagent.identity.CurrentDemoUser;
 import com.yike.aftersaleagent.knowledge.KnowledgeAnswerService;
+import com.yike.aftersaleagent.ticket.RefundSubmission;
+import com.yike.aftersaleagent.ticket.RefundWorkflow;
 import com.yike.aftersaleagent.tool.AgentExecutionContext;
 import java.util.List;
 import org.slf4j.MDC;
@@ -27,16 +29,19 @@ class DefaultChatOrchestrator implements ChatOrchestrator {
     private final IntentRouter intentRouter;
     private final KnowledgeAnswerService knowledgeAnswerService;
     private final CouponAnalysisWorkflow couponAnalysisWorkflow;
+    private final RefundWorkflow refundWorkflow;
 
     DefaultChatOrchestrator(
             SessionService sessionService,
             IntentRouter intentRouter,
             KnowledgeAnswerService knowledgeAnswerService,
-            CouponAnalysisWorkflow couponAnalysisWorkflow) {
+            CouponAnalysisWorkflow couponAnalysisWorkflow,
+            RefundWorkflow refundWorkflow) {
         this.sessionService = sessionService;
         this.intentRouter = intentRouter;
         this.knowledgeAnswerService = knowledgeAnswerService;
         this.couponAnalysisWorkflow = couponAnalysisWorkflow;
+        this.refundWorkflow = refundWorkflow;
     }
 
     @Override
@@ -57,6 +62,18 @@ class DefaultChatOrchestrator implements ChatOrchestrator {
                 publisher.message(knowledgeAnswerService.answer(context));
             } else if (intent == Intent.COUPON_ANALYSIS) {
                 publisher.message(couponAnalysisWorkflow.execute(context, publisher::status));
+            } else if (intent == Intent.REFUND_ELIGIBILITY) {
+                RefundSubmission submission = refundWorkflow.submit(context, publisher::status);
+                publisher.ticket(submission.ticketId(), submission.currentStatus().name());
+                submission.completion().whenComplete((outcome, failure) -> {
+                    if (failure == null) {
+                        publisher.message(outcome);
+                    } else {
+                        publisher.error(ErrorCode.INTERNAL_ERROR.getCode(), ErrorCode.INTERNAL_ERROR.getMessage());
+                    }
+                    publisher.done();
+                });
+                return emitter;
             } else {
                 publisher.message(outcome(intent));
             }

@@ -14,22 +14,27 @@ final class SseEmitterEventPublisher implements SseEventPublisher {
     }
 
     @Override
-    public void status(String text) {
+    public synchronized void status(String text) {
         send(SseEmitter.event().name("status").data(text));
     }
 
     @Override
-    public void message(ChatOutcome outcome) {
+    public synchronized void ticket(long ticketId, String taskStatus) {
+        send(SseEmitter.event().name("ticket").data(Map.of("ticketId", ticketId, "taskStatus", taskStatus)));
+    }
+
+    @Override
+    public synchronized void message(ChatOutcome outcome) {
         send(SseEmitter.event().name("message").data(outcome));
     }
 
     @Override
-    public void error(String code, String text) {
+    public synchronized void error(String code, String text) {
         send(SseEmitter.event().name("error").data(Map.of("code", code, "message", text)));
     }
 
     @Override
-    public void done() {
+    public synchronized void done() {
         if (closed) {
             return;
         }
