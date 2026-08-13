@@ -12,11 +12,11 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
@@ -67,6 +67,16 @@ class SessionControllerTest {
         String sessionId = sessionIdFrom(createResult);
         mockMvc.perform(get("/api/sessions/{sessionId}/messages", sessionId)
                         .header("X-Demo-User-Id", "10002"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("SESSION_NOT_FOUND"));
+    }
+
+    @Test
+    void nonexistentSessionIsNotFoundForAuthenticatedDemoUser() throws Exception {
+        mockMvc.perform(get(
+                        "/api/sessions/{sessionId}/messages",
+                        "00000000-0000-0000-0000-000000000000")
+                        .header("X-Demo-User-Id", "10001"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.code").value("SESSION_NOT_FOUND"));
     }
