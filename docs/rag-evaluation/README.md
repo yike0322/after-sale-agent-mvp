@@ -1,6 +1,6 @@
 # RAG 检索评估
 
-本目录的 `questions.json` 是可重复执行的 20 条演示检索集。每条问题都有受控的
+`src/main/resources/rag-evaluation/questions.json` 是可重复执行的 20 条演示检索集。每条问题都有受控的
 场景、预期来源路径和证据短语；它只用于核对检索到的引用，不自动判断大模型答案质量。
 
 ## 前置条件
