@@ -13,6 +13,9 @@ public enum ErrorCode {
     TOOL_TIMEOUT("TOOL_TIMEOUT", "The tool request timed out", HttpStatus.GATEWAY_TIMEOUT),
     TOOL_EXECUTION_FAILED("TOOL_EXECUTION_FAILED", "The tool request could not be completed", HttpStatus.INTERNAL_SERVER_ERROR),
     TOOL_AUDIT_FAILED("TOOL_AUDIT_FAILED", "The tool request could not be audited", HttpStatus.INTERNAL_SERVER_ERROR),
+    ILLEGAL_TASK_TRANSITION("ILLEGAL_TASK_TRANSITION", "The ticket task transition is not allowed", HttpStatus.CONFLICT),
+    TICKET_NOT_FOUND_OR_FORBIDDEN("TICKET_NOT_FOUND_OR_FORBIDDEN", "Ticket was not found", HttpStatus.NOT_FOUND),
+    TICKET_PERSISTENCE_FAILED("TICKET_PERSISTENCE_FAILED", "The ticket could not be persisted", HttpStatus.INTERNAL_SERVER_ERROR),
     BAD_REQUEST("COMMON_BAD_REQUEST", "Invalid request", HttpStatus.BAD_REQUEST),
     INTERNAL_ERROR("COMMON_INTERNAL_ERROR", "Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
 
