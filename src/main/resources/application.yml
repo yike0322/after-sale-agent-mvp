@@ -1,6 +1,10 @@
 spring:
   application:
     name: after-sale-agent
+  profiles:
+    default: mock
+    group:
+      test: mock
 
 management:
   endpoints:

@@ -1,0 +1,8 @@
+aftersale:
+  ai:
+    provider: mock
+
+spring:
+  ai:
+    dashscope:
+      enabled: false
