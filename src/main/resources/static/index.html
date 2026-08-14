@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="售后工单 Agent 控制台：本地演示用">
+    <title>售后工单 Agent 控制台</title>
+    <link rel="stylesheet" href="/app.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#login" aria-label="返回登录页">售后工单 <span>Agent 控制台</span></a>
+      <div class="identity" id="identity" hidden>
+        <span id="identity-name"></span>
+        <span class="chip" id="identity-role"></span>
+        <button class="link-button" id="logout-button" type="button">退出登录</button>
+      </div>
+    </header>
+
+    <main class="shell">
+      <section class="login-view panel" id="login-view" aria-labelledby="login-title">
+        <p class="eyebrow">LOCAL DEMO · FICTIONAL DATA</p>
+        <h1 id="login-title">售后工单 Agent 控制台</h1>
+        <p class="muted">通过角色、知识检索、受治理 Tool、异步工单和 SSE 流式轨迹演示 Java + Agent 后端能力。</p>
+        <form id="login-form" class="form-stack">
+          <label>账号<input id="account" name="account" autocomplete="username" required></label>
+          <label>密码<input id="password" name="password" type="password" autocomplete="current-password" required></label>
+          <button class="primary" type="submit">登录演示台</button>
+        </form>
+        <div class="demo-accounts" aria-label="演示账号说明">
+          <strong>演示账号（仅本地测试数据）</strong>
+          <button type="button" data-account="buyer_li" data-password="Buyer#2026">客户：buyer_li</button>
+          <button type="button" data-account="buyer_wang" data-password="Buyer#2026">客户：buyer_wang</button>
+          <button type="button" data-account="supervisor_chen" data-password="Supervisor#2026">主管：supervisor_chen</button>
+        </div>
+        <p id="login-error" class="error" role="alert" aria-live="polite"></p>
+      </section>
+
+      <section class="customer-view" id="customer-view" hidden aria-label="客户工作台">
+        <div class="hero">
+          <div><p class="eyebrow">CUSTOMER WORKSPACE</p><h1>智能售后对话与我的工单</h1></div>
+          <button class="secondary" id="refresh-my-tickets" type="button">刷新工单</button>
+        </div>
+        <div class="workspace-grid">
+          <section class="panel chat-panel" aria-labelledby="chat-title">
+            <div class="panel-title"><h2 id="chat-title">Agent 对话</h2><span id="session-label" class="muted">会话准备中</span></div>
+            <div class="quick-prompts" aria-label="快捷演示问题">
+              <button type="button" data-prompt="订单O1001使用优惠券C1001为什么不能使用？">优惠券门槛</button>
+              <button type="button" data-prompt="订单O1002的优惠券C1002还能用吗？">优惠券过期</button>
+              <button type="button" data-prompt="订单O2001可以提现吗？">退款资格</button>
+              <button type="button" data-prompt="售后规则是什么？">RAG 规则问答</button>
+            </div>
+            <div class="conversation" id="conversation" aria-live="polite"></div>
+            <form class="chat-form" id="chat-form">
+              <label class="sr-only" for="chat-message">输入售后问题</label>
+              <textarea id="chat-message" rows="3" required placeholder="例如：订单O1001使用优惠券C1001为什么不能使用？"></textarea>
+              <button class="primary" type="submit">发送并流式处理</button>
+            </form>
+          </section>
+          <aside class="right-column">
+            <section class="panel event-timeline" aria-labelledby="timeline-title">
+              <h2 id="timeline-title">SSE 执行进度</h2><ol id="timeline"></ol>
+            </section>
+            <section class="panel citation-list" aria-labelledby="citation-title">
+              <h2 id="citation-title">知识来源引用</h2><ul id="citations"></ul>
+            </section>
+          </aside>
+        </div>
+        <div class="ticket-grid">
+          <section class="panel my-ticket-list" aria-labelledby="my-ticket-title">
+            <h2 id="my-ticket-title">我的工单</h2><div id="my-ticket-items" class="ticket-items"></div>
+          </section>
+          <section class="panel ticket-detail" aria-labelledby="ticket-detail-title">
+            <h2 id="ticket-detail-title">工单详情</h2><div id="ticket-detail-content" class="empty">选择一条工单查看状态。</div>
+          </section>
+          <section class="panel ticket-trace" aria-labelledby="ticket-trace-title">
+            <h2 id="ticket-trace-title">可审计执行轨迹</h2><div id="ticket-trace-content" class="empty">轨迹展示 Agent 步骤和 Tool 脱敏摘要。</div>
+          </section>
+        </div>
+      </section>
+
+      <section class="supervisor-view" id="supervisor-view" hidden aria-label="主管工作台">
+        <div class="hero">
+          <div><p class="eyebrow">SUPERVISOR WORKSPACE</p><h1>工单治理与知识库运维</h1></div>
+          <div class="button-row"><button class="secondary" id="refresh-supervisor-tickets" type="button">刷新工单</button><button class="primary" id="reindex-button" type="button">重建知识库索引</button></div>
+        </div>
+        <p id="supervisor-notice" class="notice" role="status" aria-live="polite">知识重建仅在 local,dashscope 环境可用；测试环境会安全提示不可用。</p>
+        <div class="ticket-grid supervisor-grid">
+          <section class="panel supervisor-ticket-list" aria-labelledby="supervisor-ticket-title">
+            <h2 id="supervisor-ticket-title">全部工单</h2><div id="supervisor-ticket-items" class="ticket-items"></div>
+          </section>
+          <section class="panel ticket-detail" aria-labelledby="supervisor-detail-title">
+            <h2 id="supervisor-detail-title">工单详情</h2><div id="supervisor-ticket-detail" class="empty">选择任意工单查看详情。</div>
+          </section>
+          <section class="panel ticket-trace" aria-labelledby="supervisor-trace-title">
+            <h2 id="supervisor-trace-title">跨用户脱敏轨迹</h2><div id="supervisor-ticket-trace" class="empty">选择工单查看 Agent 与 Tool 轨迹。</div>
+          </section>
+        </div>
+      </section>
+    </main>
+    <script src="/app.js" defer></script>
+  </body>
+</html>

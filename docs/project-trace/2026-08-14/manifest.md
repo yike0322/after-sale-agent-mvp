@@ -21,3 +21,5 @@ Implementation source files are intentionally kept under `src/` rather than copi
 | `business-rules/refund-review-policy.md` | 退款审核规则 | 虚构、去标识化 |
 | `demo-data/accounts-and-orders.md` | 账号与订单 | 虚构、去标识化 |
 | `demo-data/tickets-and-traces.md` | 工单与轨迹 | 虚构、去标识化 |
+| `api-examples/browser-console.md` | 浏览器 API 示例 | 虚构、去标识化 |
+| `test-evidence/static-console-acceptance.md` | 静态页面验收证据 | 虚构、去标识化 |
