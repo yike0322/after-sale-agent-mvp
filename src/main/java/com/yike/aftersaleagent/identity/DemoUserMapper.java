@@ -12,7 +12,12 @@ public interface DemoUserMapper {
     @Select("SELECT COUNT(*) FROM demo_user")
     long countDemoUsers();
 
-    @Select("SELECT id, display_name FROM demo_user WHERE id = #{id}")
+    @Select("""
+            SELECT du.id, du.display_name AS displayName, COALESCE(da.role, 'CUSTOMER') AS role
+            FROM demo_user du
+            LEFT JOIN demo_account da ON da.user_id = du.id
+            WHERE du.id = #{id}
+            """)
     CurrentDemoUser findById(@Param("id") long id);
 
     @Insert("INSERT INTO demo_user (id, display_name) VALUES (#{id}, #{displayName})")

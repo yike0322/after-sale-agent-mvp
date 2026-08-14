@@ -19,3 +19,7 @@ spring:
         use-tls: false
         # Spring AI 1.1.2 intentionally uses the built-in Qdrant doc_content field.
         initialize-schema: true
+
+aftersale:
+  demo-auth:
+    hmac-secret: ${DEMO_AUTH_HMAC_SECRET}

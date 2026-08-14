@@ -14,3 +14,7 @@ management:
   health:
     redis:
       enabled: false
+
+aftersale:
+  demo-auth:
+    hmac-secret: test-demo-auth-secret-that-is-long-enough

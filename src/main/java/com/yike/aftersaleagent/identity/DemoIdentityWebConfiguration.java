@@ -14,6 +14,8 @@ class DemoIdentityWebConfiguration implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(demoUserInterceptor).addPathPatterns("/api/**");
+        registry.addInterceptor(demoUserInterceptor)
+                .addPathPatterns("/api/**")
+                .excludePathPatterns("/api/auth/login");
     }
 }

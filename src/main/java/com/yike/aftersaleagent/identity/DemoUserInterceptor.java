@@ -3,6 +3,7 @@ package com.yike.aftersaleagent.identity;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yike.aftersaleagent.common.api.ApiResponse;
 import com.yike.aftersaleagent.common.api.ErrorCode;
+import com.yike.aftersaleagent.common.exception.BusinessException;
 import com.yike.aftersaleagent.common.trace.RequestIdFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,10 +21,13 @@ public class DemoUserInterceptor implements HandlerInterceptor {
     private static final String DEMO_USER_HEADER = "X-Demo-User-Id";
 
     private final DemoUserMapper demoUserMapper;
+    private final DemoTokenService demoTokenService;
     private final ObjectMapper objectMapper;
 
-    public DemoUserInterceptor(DemoUserMapper demoUserMapper, ObjectMapper objectMapper) {
+    public DemoUserInterceptor(
+            DemoUserMapper demoUserMapper, DemoTokenService demoTokenService, ObjectMapper objectMapper) {
         this.demoUserMapper = demoUserMapper;
+        this.demoTokenService = demoTokenService;
         this.objectMapper = objectMapper;
     }
 
@@ -31,13 +35,21 @@ public class DemoUserInterceptor implements HandlerInterceptor {
     public boolean preHandle(
             HttpServletRequest request, HttpServletResponse response, Object handler)
             throws IOException {
-        String header = request.getHeader(DEMO_USER_HEADER);
-        if (!StringUtils.hasText(header)) {
-            writeError(response, ErrorCode.DEMO_USER_REQUIRED);
+        CurrentDemoUser user;
+        try {
+            user = findBearerUser(request.getHeader("Authorization"));
+        } catch (BusinessException exception) {
+            writeError(response, exception.getErrorCode());
             return false;
         }
-
-        CurrentDemoUser user = findDemoUser(header.trim());
+        if (user == null) {
+            String header = request.getHeader(DEMO_USER_HEADER);
+            if (!StringUtils.hasText(header)) {
+                writeError(response, ErrorCode.DEMO_USER_REQUIRED);
+                return false;
+            }
+            user = findDemoUser(header.trim());
+        }
         if (user == null) {
             writeError(response, ErrorCode.DEMO_USER_NOT_FOUND);
             return false;
@@ -59,6 +71,16 @@ public class DemoUserInterceptor implements HandlerInterceptor {
         } catch (NumberFormatException ignored) {
             return null;
         }
+    }
+
+    private CurrentDemoUser findBearerUser(String authorization) {
+        if (!StringUtils.hasText(authorization)) {
+            return null;
+        }
+        if (!authorization.startsWith("Bearer ")) {
+            throw new BusinessException(ErrorCode.AUTH_TOKEN_INVALID);
+        }
+        return demoTokenService.verify(authorization.substring(7).strip());
     }
 
     private void writeError(HttpServletResponse response, ErrorCode errorCode) throws IOException {

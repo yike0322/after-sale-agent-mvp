@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.DefaultApplicationArguments;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,6 +28,12 @@ class DemoDataInitializerTest {
     DemoUserMapper demoUserMapper;
 
     @Autowired
+    DemoAccountMapper demoAccountMapper;
+
+    @Autowired
+    PasswordEncoder passwordEncoder;
+
+    @Autowired
     JdbcTemplate jdbcTemplate;
 
     @Test
@@ -37,7 +44,14 @@ class DemoDataInitializerTest {
 
         List<Long> userIds = jdbcTemplate.queryForList(
                 "SELECT id FROM demo_user ORDER BY id", Long.class);
-        assertThat(userIds).containsExactly(10001L, 10002L);
+        assertThat(userIds).containsExactly(10001L, 10002L, 10003L);
+        assertThat(count("demo_account")).isEqualTo(3);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT account FROM demo_account WHERE user_id = 10003", String.class))
+                .isEqualTo("supervisor_chen");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT role FROM demo_account WHERE user_id = 10003", String.class))
+                .isEqualTo("SUPERVISOR");
 
         assertThat(count("order_info")).isEqualTo(2);
         assertThat(jdbcTemplate.queryForObject(
@@ -80,14 +94,17 @@ class DemoDataInitializerTest {
                 .containsExactly(20000L);
         assertThat(count("order_info")).isZero();
         assertThat(count("coupon_info")).isZero();
+        assertThat(count("demo_account")).isZero();
     }
 
     private void runInitializer() throws Exception {
-        DemoDataInitializer initializer = new DemoDataInitializer(demoUserMapper, FIXED_CLOCK);
+        DemoDataInitializer initializer = new DemoDataInitializer(
+                demoUserMapper, demoAccountMapper, passwordEncoder, FIXED_CLOCK);
         initializer.run(new DefaultApplicationArguments(new String[0]));
     }
 
     private void clearSeedTables() {
+        jdbcTemplate.update("DELETE FROM demo_account");
         jdbcTemplate.update("DELETE FROM coupon_info");
         jdbcTemplate.update("DELETE FROM order_info");
         jdbcTemplate.update("DELETE FROM demo_user");
