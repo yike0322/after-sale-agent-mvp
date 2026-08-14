@@ -1,5 +1,29 @@
 # 智能售后工单 Agent MVP
 
+## 浏览器演示启动（推荐）
+
+该项目已包含零依赖静态界面：使用 Java 21 运行 `test` profile 后，浏览器访问 `http://localhost:8080/`。
+
+```powershell
+$jdkHome = 'C:\Program Files\Microsoft\jdk-21.0.12.8-hotspot'
+$mavenHome = 'C:\Users\fyq\tools\apache-maven-3.9.16'
+$env:JAVA_HOME = $jdkHome
+$env:MAVEN_HOME = $mavenHome
+$env:Path = "$jdkHome\bin;$mavenHome\bin;" + $env:Path
+
+.\mvnw.cmd package
+& "$jdkHome\bin\java.exe" -jar target\after-sale-agent-0.0.1-SNAPSHOT.jar --spring.profiles.active=test
+```
+
+演示账号（只用于本地虚构数据）：
+
+| 账号 | 密码 | 角色 |
+| --- | --- | --- |
+| `buyer_li` / `buyer_wang` | `Buyer#2026` | 客户：仅自己的会话、工单与轨迹 |
+| `supervisor_chen` | `Supervisor#2026` | 主管：所有演示工单与脱敏轨迹；可触发知识重建入口 |
+
+浏览器界面放在 `src/main/resources/static/`，不需要 Node.js、npm 或前端构建工具。`test` profile 使用内置 H2 和 Mock AI；真实 RAG/重建需要 `local,dashscope` 以及 MySQL、Redis、Qdrant、`DEMO_AUTH_HMAC_SECRET` 与 `DASHSCOPE_API_KEY`。所有虚构规则、演示数据、API 例子和验收记录在 `docs/project-trace/2026-08-14/`。
+
 面向电商售后客服的 Java 后端项目。它把大模型限定在意图识别、知识问答和受控表达三个位置；订单、优惠券、退款资格与工单状态均由 Java 规则、工具白名单和持久化状态机控制。
 
 > 退款场景只生成本地 `WAIT_HUMAN` 人工审核工单，**不会调用支付、退款、账户或外部客服系统**。
