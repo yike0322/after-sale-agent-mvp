@@ -11,3 +11,13 @@ This directory is the audit trail for the static demo-console feature.
 | Test evidence | `test-evidence/` | Commands and expected acceptance outcomes. |
 
 Implementation source files are intentionally kept under `src/` rather than copied here. Each generated source asset will be listed in this manifest when implemented.
+
+## 已生成资产
+
+| 文件 | 分类 | 数据性质 |
+| --- | --- | --- |
+| `business-rules/after-sale-policy.md` | 售后规则 | 虚构、去标识化 |
+| `business-rules/coupon-policy.md` | 优惠券规则 | 虚构、去标识化 |
+| `business-rules/refund-review-policy.md` | 退款审核规则 | 虚构、去标识化 |
+| `demo-data/accounts-and-orders.md` | 账号与订单 | 虚构、去标识化 |
+| `demo-data/tickets-and-traces.md` | 工单与轨迹 | 虚构、去标识化 |

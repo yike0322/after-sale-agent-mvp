@@ -37,7 +37,7 @@ class DemoDataInitializerTest {
     JdbcTemplate jdbcTemplate;
 
     @Test
-    void emptyDemoUserTableSeedsExactlyTheRequiredScenario() throws Exception {
+    void emptyDemoUserTableSeedsTheControlledDemoScenario() throws Exception {
         clearSeedTables();
 
         runInitializer();
@@ -53,7 +53,7 @@ class DemoDataInitializerTest {
                 "SELECT role FROM demo_account WHERE user_id = 10003", String.class))
                 .isEqualTo("SUPERVISOR");
 
-        assertThat(count("order_info")).isEqualTo(2);
+        assertThat(count("order_info")).isEqualTo(6);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT user_id FROM order_info WHERE order_no = 'O1001'", Long.class))
                 .isEqualTo(10001L);
@@ -61,7 +61,8 @@ class DemoDataInitializerTest {
                 "SELECT order_amount FROM order_info WHERE order_no = 'O1001'", BigDecimal.class))
                 .isEqualByComparingTo("80.00");
 
-        assertThat(count("coupon_info")).isEqualTo(1);
+        assertThat(count("coupon_info")).isEqualTo(2);
+        assertThat(count("customer_ticket")).isEqualTo(4);
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT user_id FROM coupon_info WHERE coupon_code = 'C1001'", Long.class))
                 .isEqualTo(10001L);
@@ -97,6 +98,25 @@ class DemoDataInitializerTest {
         assertThat(count("demo_account")).isZero();
     }
 
+    @Test
+    void seedsRoleAccountsAndCompleteAfterSaleScenarioCoverage() throws Exception {
+        clearSeedTables();
+
+        runInitializer();
+
+        assertThat(demoAccountMapper.findByAccount("buyer_li").role()).isEqualTo(DemoRole.CUSTOMER);
+        assertThat(demoAccountMapper.findByAccount("supervisor_chen").role()).isEqualTo(DemoRole.SUPERVISOR);
+        assertThat(count("order_info")).isEqualTo(6);
+        assertThat(count("coupon_info")).isEqualTo(2);
+        assertThat(count("customer_ticket")).isEqualTo(4);
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT order_status FROM order_info WHERE user_id = 10002 AND order_no = 'O2004'",
+                String.class)).isEqualTo("LOGISTICS_EXCEPTION");
+        assertThat(jdbcTemplate.queryForObject(
+                "SELECT status FROM coupon_info WHERE user_id = 10001 AND coupon_code = 'C1002'",
+                String.class)).isEqualTo("EXPIRED");
+    }
+
     private void runInitializer() throws Exception {
         DemoDataInitializer initializer = new DemoDataInitializer(
                 demoUserMapper, demoAccountMapper, passwordEncoder, FIXED_CLOCK);
@@ -104,6 +124,10 @@ class DemoDataInitializerTest {
     }
 
     private void clearSeedTables() {
+        jdbcTemplate.update("DELETE FROM tool_call_log");
+        jdbcTemplate.update("DELETE FROM agent_step_log");
+        jdbcTemplate.update("DELETE FROM ticket_task");
+        jdbcTemplate.update("DELETE FROM customer_ticket");
         jdbcTemplate.update("DELETE FROM demo_account");
         jdbcTemplate.update("DELETE FROM coupon_info");
         jdbcTemplate.update("DELETE FROM order_info");

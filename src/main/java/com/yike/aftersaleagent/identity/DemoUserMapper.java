@@ -55,4 +55,79 @@ public interface DemoUserMapper {
             @Param("thresholdAmount") BigDecimal thresholdAmount,
             @Param("discountAmount") BigDecimal discountAmount,
             @Param("status") String status);
+
+    @Insert("""
+            INSERT INTO coupon_info
+                (user_id, coupon_code, coupon_name, threshold_amount, discount_amount, status, start_at, end_at)
+            VALUES
+                (#{userId}, #{couponCode}, #{couponName}, #{thresholdAmount}, #{discountAmount}, #{status},
+                 #{startAt}, #{endAt})
+            """)
+    void insertCouponWithValidity(
+            @Param("userId") long userId,
+            @Param("couponCode") String couponCode,
+            @Param("couponName") String couponName,
+            @Param("thresholdAmount") BigDecimal thresholdAmount,
+            @Param("discountAmount") BigDecimal discountAmount,
+            @Param("status") String status,
+            @Param("startAt") LocalDateTime startAt,
+            @Param("endAt") LocalDateTime endAt);
+
+    @Insert("""
+            INSERT INTO customer_ticket
+                (id, user_id, ticket_type, priority, status, title, description, result_summary)
+            VALUES
+                (#{ticketId}, #{userId}, #{ticketType}, #{priority}, #{status}, #{title}, #{description}, #{resultSummary})
+            """)
+    void insertHistoricalTicket(
+            @Param("ticketId") long ticketId,
+            @Param("userId") long userId,
+            @Param("ticketType") String ticketType,
+            @Param("priority") String priority,
+            @Param("status") String status,
+            @Param("title") String title,
+            @Param("description") String description,
+            @Param("resultSummary") String resultSummary);
+
+    @Insert("""
+            INSERT INTO ticket_task (ticket_id, idempotency_key, status, current_step, total_steps)
+            VALUES (#{ticketId}, #{idempotencyKey}, #{status}, #{currentStep}, #{totalSteps})
+            """)
+    void insertHistoricalTicketTask(
+            @Param("ticketId") long ticketId,
+            @Param("idempotencyKey") String idempotencyKey,
+            @Param("status") String status,
+            @Param("currentStep") int currentStep,
+            @Param("totalSteps") int totalSteps);
+
+    @Insert("""
+            INSERT INTO agent_step_log
+                (ticket_id, step_no, step_name, status, input_summary, output_summary, started_at, ended_at)
+            VALUES
+                (#{ticketId}, #{stepNo}, #{stepName}, #{status}, #{inputSummary}, #{outputSummary},
+                 #{occurredAt}, #{occurredAt})
+            """)
+    void insertHistoricalStep(
+            @Param("ticketId") long ticketId,
+            @Param("stepNo") int stepNo,
+            @Param("stepName") String stepName,
+            @Param("status") String status,
+            @Param("inputSummary") String inputSummary,
+            @Param("outputSummary") String outputSummary,
+            @Param("occurredAt") LocalDateTime occurredAt);
+
+    @Insert("""
+            INSERT INTO tool_call_log
+                (ticket_id, tool_name, request_summary, response_summary, success, cost_time_ms, request_id)
+            VALUES
+                (#{ticketId}, #{toolName}, #{requestSummary}, #{responseSummary}, #{success}, #{costTimeMs}, #{requestId})
+            """)
+    void insertHistoricalToolCall(
+            @Param("ticketId") long ticketId,
+            @Param("toolName") String toolName,
+            @Param("requestSummary") String requestSummary,
+            @Param("responseSummary") String responseSummary,
+            @Param("success") boolean success,
+            @Param("costTimeMs") long costTimeMs,
+            @Param("requestId") String requestId);
 }
