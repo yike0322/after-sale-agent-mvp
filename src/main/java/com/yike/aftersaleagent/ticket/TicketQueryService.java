@@ -6,6 +6,8 @@ import com.yike.aftersaleagent.ticket.api.AgentStepLogResponse;
 import com.yike.aftersaleagent.ticket.api.TicketDetailResponse;
 import com.yike.aftersaleagent.ticket.api.TicketTraceResponse;
 import com.yike.aftersaleagent.ticket.api.ToolCallLogResponse;
+import com.yike.aftersaleagent.ticket.api.TicketListItemResponse;
+import com.yike.aftersaleagent.ticket.api.TicketListResponse;
 import com.yike.aftersaleagent.tool.ToolCallLogMapper;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -42,6 +44,34 @@ public class TicketQueryService {
                         tool.requestSummary(), tool.responseSummary(), tool.errorCode()))
                 .toList();
         return new TicketTraceResponse(ticketId, steps, tools);
+    }
+
+    public TicketListResponse listOwnedTickets(long userId, String status) {
+        return new TicketListResponse(ticketMapper.listOwned(userId, validateStatus(status)).stream()
+                .map(ticket -> toListItem(ticket, null))
+                .toList());
+    }
+
+    public TicketListResponse listAllTickets(String status) {
+        return new TicketListResponse(ticketMapper.listAll(validateStatus(status)).stream()
+                .map(ticket -> toListItem(ticket, ticket.userId()))
+                .toList());
+    }
+
+    private TicketListItemResponse toListItem(TicketListItemRecord ticket, Long userId) {
+        return new TicketListItemResponse(ticket.ticketId(), userId, ticket.ticketType(), ticket.status(),
+                ticket.priority(), ticket.currentStep(), ticket.totalSteps(), ticket.updatedAt());
+    }
+
+    private String validateStatus(String status) {
+        if (status == null || status.isBlank()) {
+            return null;
+        }
+        try {
+            return com.yike.aftersaleagent.ticket.domain.TicketTaskStatus.valueOf(status.trim()).name();
+        } catch (IllegalArgumentException exception) {
+            throw new BusinessException(ErrorCode.BAD_REQUEST);
+        }
     }
 
     private TicketDetailRecord requireOwnedDetail(long userId, long ticketId) {

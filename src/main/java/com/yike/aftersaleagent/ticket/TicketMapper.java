@@ -5,6 +5,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import java.util.List;
 
 @Mapper
 public interface TicketMapper {
@@ -38,4 +39,30 @@ public interface TicketMapper {
             """)
     @Options(timeout = 2)
     TicketDetailRecord findOwnedDetail(@Param("userId") long userId, @Param("ticketId") long ticketId);
+
+    @Select("""
+            SELECT ct.id AS ticketId, ct.user_id AS userId, ct.ticket_type AS ticketType, ct.status,
+                   ct.priority, tt.current_step AS currentStep, tt.total_steps AS totalSteps,
+                   ct.updated_at AS updatedAt
+            FROM customer_ticket ct
+            JOIN ticket_task tt ON tt.ticket_id = ct.id
+            WHERE ct.user_id = #{userId}
+              AND (#{status} IS NULL OR ct.status = #{status})
+            ORDER BY ct.updated_at DESC, ct.id DESC
+            """)
+    @Options(timeout = 2)
+    List<TicketListItemRecord> listOwned(
+            @Param("userId") long userId, @Param("status") String status);
+
+    @Select("""
+            SELECT ct.id AS ticketId, ct.user_id AS userId, ct.ticket_type AS ticketType, ct.status,
+                   ct.priority, tt.current_step AS currentStep, tt.total_steps AS totalSteps,
+                   ct.updated_at AS updatedAt
+            FROM customer_ticket ct
+            JOIN ticket_task tt ON tt.ticket_id = ct.id
+            WHERE (#{status} IS NULL OR ct.status = #{status})
+            ORDER BY ct.updated_at DESC, ct.id DESC
+            """)
+    @Options(timeout = 2)
+    List<TicketListItemRecord> listAll(@Param("status") String status);
 }
