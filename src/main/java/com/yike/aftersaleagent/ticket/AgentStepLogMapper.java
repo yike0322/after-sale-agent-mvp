@@ -38,4 +38,15 @@ public interface AgentStepLogMapper {
             """)
     @Options(timeout = 2)
     List<AgentStepLogRecord> findForOwnedTicket(@Param("userId") long userId, @Param("ticketId") long ticketId);
+
+    @Select("""
+            SELECT step_no AS stepNo, step_name AS stepName, status,
+                   input_summary AS inputSummary, output_summary AS outputSummary,
+                   error_message AS errorCode, started_at AS startedAt, ended_at AS endedAt
+            FROM agent_step_log
+            WHERE ticket_id = #{ticketId}
+            ORDER BY step_no ASC, id ASC
+            """)
+    @Options(timeout = 2)
+    List<AgentStepLogRecord> findForTicket(@Param("ticketId") long ticketId);
 }

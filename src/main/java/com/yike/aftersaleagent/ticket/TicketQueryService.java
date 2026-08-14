@@ -46,6 +46,25 @@ public class TicketQueryService {
         return new TicketTraceResponse(ticketId, steps, tools);
     }
 
+    public TicketDetailResponse getAnyDetail(long ticketId) {
+        TicketDetailRecord detail = requireAnyDetail(ticketId);
+        return new TicketDetailResponse(detail.ticketId(), detail.ticketType(), detail.status(), detail.priority(),
+                detail.currentStep(), detail.totalSteps(), detail.resultSummary());
+    }
+
+    public TicketTraceResponse getAnyTrace(long ticketId) {
+        requireAnyDetail(ticketId);
+        List<AgentStepLogResponse> steps = agentStepLogMapper.findForTicket(ticketId).stream()
+                .map(step -> new AgentStepLogResponse(step.stepNo(), step.stepName(), step.status(),
+                        step.inputSummary(), step.outputSummary(), step.errorCode(), step.startedAt(), step.endedAt()))
+                .toList();
+        List<ToolCallLogResponse> tools = toolCallLogMapper.findForTicket(ticketId).stream()
+                .map(tool -> new ToolCallLogResponse(tool.toolName(), tool.success(), tool.costTimeMs(),
+                        tool.requestSummary(), tool.responseSummary(), tool.errorCode()))
+                .toList();
+        return new TicketTraceResponse(ticketId, steps, tools);
+    }
+
     public TicketListResponse listOwnedTickets(long userId, String status) {
         return new TicketListResponse(ticketMapper.listOwned(userId, validateStatus(status)).stream()
                 .map(ticket -> toListItem(ticket, null))
@@ -76,6 +95,14 @@ public class TicketQueryService {
 
     private TicketDetailRecord requireOwnedDetail(long userId, long ticketId) {
         TicketDetailRecord detail = ticketMapper.findOwnedDetail(userId, ticketId);
+        if (detail == null) {
+            throw new BusinessException(ErrorCode.TICKET_NOT_FOUND_OR_FORBIDDEN);
+        }
+        return detail;
+    }
+
+    private TicketDetailRecord requireAnyDetail(long ticketId) {
+        TicketDetailRecord detail = ticketMapper.findAnyDetail(ticketId);
         if (detail == null) {
             throw new BusinessException(ErrorCode.TICKET_NOT_FOUND_OR_FORBIDDEN);
         }

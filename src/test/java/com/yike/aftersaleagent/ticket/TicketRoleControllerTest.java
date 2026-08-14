@@ -53,6 +53,16 @@ class TicketRoleControllerTest {
                 .andExpect(jsonPath("$.data.items[0].userId").doesNotExist());
     }
 
+    @Test
+    void supervisorCanInspectAnotherCustomersTicketAndTrace() throws Exception {
+        mockMvc.perform(get("/api/supervisor/tickets/902").header("Authorization", supervisorBearer()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ticketId").value(902));
+        mockMvc.perform(get("/api/supervisor/tickets/902/trace").header("Authorization", supervisorBearer()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.ticketId").value(902));
+    }
+
     private void insertTicket(long ticketId, long userId, String status) {
         jdbcTemplate.update("""
                 INSERT INTO customer_ticket (id, user_id, ticket_type, priority, status, title)

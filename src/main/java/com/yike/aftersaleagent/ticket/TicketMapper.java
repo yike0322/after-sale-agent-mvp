@@ -41,6 +41,17 @@ public interface TicketMapper {
     TicketDetailRecord findOwnedDetail(@Param("userId") long userId, @Param("ticketId") long ticketId);
 
     @Select("""
+            SELECT ct.id AS ticketId, ct.ticket_type AS ticketType, ct.status, ct.priority,
+                   tt.current_step AS currentStep, tt.total_steps AS totalSteps,
+                   ct.result_summary AS resultSummary
+            FROM customer_ticket ct
+            JOIN ticket_task tt ON tt.ticket_id = ct.id
+            WHERE ct.id = #{ticketId}
+            """)
+    @Options(timeout = 2)
+    TicketDetailRecord findAnyDetail(@Param("ticketId") long ticketId);
+
+    @Select("""
             SELECT ct.id AS ticketId, ct.user_id AS userId, ct.ticket_type AS ticketType, ct.status,
                    ct.priority, tt.current_step AS currentStep, tt.total_steps AS totalSteps,
                    ct.updated_at AS updatedAt

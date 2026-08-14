@@ -55,4 +55,15 @@ public interface ToolCallLogMapper {
             """)
     @org.apache.ibatis.annotations.Options(timeout = 2)
     List<ToolCallLogRecord> findForOwnedTicket(@Param("userId") long userId, @Param("ticketId") long ticketId);
+
+    @Select("""
+            SELECT tool_name AS toolName, success, cost_time_ms AS costTimeMs,
+                   request_summary AS requestSummary, response_summary AS responseSummary,
+                   error_message AS errorCode
+            FROM tool_call_log
+            WHERE ticket_id = #{ticketId}
+            ORDER BY created_at ASC, id ASC
+            """)
+    @org.apache.ibatis.annotations.Options(timeout = 2)
+    List<ToolCallLogRecord> findForTicket(@Param("ticketId") long ticketId);
 }
